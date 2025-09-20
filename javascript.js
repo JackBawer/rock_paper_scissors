@@ -1,5 +1,7 @@
+let userScore = 0;
+let computerScore = 0;
+
 const buttons = document.querySelectorAll('input');
-let result = document.querySelector("#result");
 
 // Random choice (rock, paper, scissors)
 function getComputerChoice() {
@@ -7,64 +9,55 @@ function getComputerChoice() {
     return choices[Math.floor(Math.random() * choices.length)];
 }
 
-// Score function
-function getScore(userScore, computerScore) {
-    const divScore = document.querySelector(".divScore");
-    const score = document.createElement("p");
-    score.innerText = `Hughmann ${userScore} - ${computerScore} Machine `;
-    divScore.appendChild(score);
+function disableButtons() {
+    buttons.forEach(btn => {
+        btn.disabled = true;
+    })
 }
 
 // Play round function
-function playRound(user, computer, userScore, computerScore) {
+function playRound(user) {
+    // Prevent spamming the buttons
+    if (userScore >= 5 || computerScore >= 5) {
+        return;
+    }
+    let computer = getComputerChoice();
+    let result = "";
+
     if (user === computer) {
-        // It's a tie
-        getScore(userScore, computerScore);
+        userScore++;
+        computerScore++;
+        result = `Draw\nHughmann: ${userScore} - ${computerScore}: Machine\n`;
     } else if (user === "rock" && computer === "scissors" 
         || user === "paper" && computer === "rock"
         || user === "scissors" && computer === "paper") {
-        // User wins
         userScore++;
-        getScore(userScore, computerScore);
+        result = `Win\nHughmann: ${userScore} - ${computerScore}: Machine\n`;
+        if (userScore === 5) {
+            result += 'Winner. Reload the page to play again'
+            disableButtons()
+        }
     } else {
-        // Computer wins
         computerScore++;
-        getScore(userScore, computerScore);
-    }
+        result = `Loss\nHughmann: ${userScore} - ${computerScore}: Machine\n`;
+        }
+        if (computerScore === 5) {
+            result += ('Loser. Reload the page to play again');
+            disableButtons();
+        }
 
-    // Return updated scores
-    return { userScore, computerScore };
+    document.querySelector("#result").innerText = result;
+    return;
 }
 
 // Play game function
-function playGame() {
-    let result = "";
-    let userScore = 0;
-    let computerScore = 0;
-    const numRounds = 5;
-
-    // Add event listeners once
+function play() {
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            // Get the user's choice and computer's choice
-            const userChoice = button.value;
-            const computerChoice = getComputerChoice();
-
-            // Play the round and get updated scores
-            const scores = playRound(userChoice, computerChoice, userScore, computerScore);
-            userScore = scores.userScore;
-            computerScore = scores.computerScore;
-
-            // Check for a winner
-            if (userScore === numRounds) {
-                result = "You win!";
-            } else if (computerScore === numRounds) {
-                result = "You lose!";
-            }
-        });
-    });
+            playRound(button.value);
+        })
+    })
 }
 
-// Main function
-playGame();
-
+// Main
+play()
